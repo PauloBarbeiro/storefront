@@ -8,7 +8,7 @@
 @import 'bourbon';
 @import '../../../sass/utils/variables';
 @import '../../../sass/utils/mixins';
-@import 'susy';
+@import '../../../node_modules/susy/sass/susy';
 
 @media screen and (min-width: 768px) {
 	.woocommerce,
@@ -22,19 +22,21 @@
 			}
 		}
 
-		ul.products {
+		.site-main ul.products {
 			li.product-type-photography {
 				@include clearfix;
-				@include span(6 of 12);
 				text-align: left;
 
-				.photography-image {
-					@include span(1 of 6);
+				.photography-image,
+				.photography-content {
+					float: none;
+					width: 100%;
 				}
 
-				.photography-content {
-					@include span(last 5 of 6);
-					margin-left: 0;
+				.photography-image {
+					img {
+						width: 100%;
+					}
 				}
 
 				.photography-sku {

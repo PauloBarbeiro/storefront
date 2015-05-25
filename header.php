@@ -19,16 +19,15 @@
 
 <body <?php body_class(); ?>>
 <div id="page" class="hfeed site">
-	<a class="skip-link screen-reader-text" href="#content"><?php _e( 'Skip to content', 'storefront' ); ?></a>
-
 	<?php
 	do_action( 'storefront_before_header' ); ?>
 
-	<header id="masthead" class="site-header" role="banner" <?php if ( get_header_image() != '' ) { echo 'style="background-image: url(' . esc_url( get_header_image() ) . ')";'; } ?>>
+	<header id="masthead" class="site-header" role="banner" <?php if ( get_header_image() != '' ) { echo 'style="background-image: url(' . esc_url( get_header_image() ) . ');"'; } ?>>
 		<div class="col-full">
 
 			<?php
 			/**
+			 * @hooked storefront_skip_links - 0
 			 * @hooked storefront_social_icons - 10
 			 * @hooked storefront_site_branding - 20
 			 * @hooked storefront_secondary_navigation - 30
@@ -47,7 +46,7 @@
 	 */
 	do_action( 'storefront_before_content' ); ?>
 
-	<div id="content" class="site-content">
+	<div id="content" class="site-content" tabindex="-1">
 		<div class="col-full">
 
 		<?php

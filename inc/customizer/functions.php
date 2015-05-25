@@ -12,7 +12,7 @@
  */
 if ( ! function_exists( 'storefront_customize_preview_js' ) ) {
 	function storefront_customize_preview_js() {
-		wp_enqueue_script( 'storefront_customizer', get_template_directory_uri() . '/inc/customizer/js/customizer.min.js', array( 'customize-preview' ), '1.13', true );
+		wp_enqueue_script( 'storefront_customizer', get_template_directory_uri() . '/inc/customizer/js/customizer.min.js', array( 'customize-preview' ), '1.15', true );
 	}
 }
 
@@ -26,15 +26,37 @@ if ( ! function_exists( 'storefront_customize_preview_js' ) ) {
  */
 if ( ! function_exists( 'storefront_sanitize_hex_color' ) ) {
 	function storefront_sanitize_hex_color( $color ) {
-		if ( '' === $color )
+		if ( '' === $color ) {
 			return '';
+        }
 
 		// 3 or 6 hex digits, or the empty string.
-		if ( preg_match( '|^#([A-Fa-f0-9]{3}){1,2}$|', $color ) )
+		if ( preg_match( '|^#([A-Fa-f0-9]{3}){1,2}$|', $color ) ) {
 			return $color;
+        }
 
 		return null;
 	}
+}
+
+/**
+ * Sanitizes choices (selects / radios)
+ * Checks that the input matches one of the available choices
+ *
+ * @since  1.3.0
+ */
+if ( ! function_exists( 'storefront_sanitize_choices' ) ) {
+    function storefront_sanitize_choices( $input, $setting ) {
+        global $wp_customize;
+
+        $control = $wp_customize->get_control( $setting->id );
+
+        if ( array_key_exists( $input, $control->choices ) ) {
+            return $input;
+        } else {
+            return $setting->default;
+        }
+    }
 }
 
 /**
@@ -93,7 +115,7 @@ function storefront_adjust_color_brightness( $hex, $steps ) {
     // Format the hex color string
     $hex    = str_replace( '#', '', $hex );
 
-    if ( strlen( $hex ) == 3 ) {
+    if ( 3 == strlen( $hex ) ) {
         $hex    = str_repeat( substr( $hex, 0, 1 ), 2 ) . str_repeat( substr( $hex, 1, 1 ), 2 ) . str_repeat( substr( $hex, 2, 1 ), 2 );
     }
 

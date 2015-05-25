@@ -10,11 +10,11 @@
 	}
 
 	.widget-search .search-submit {
-		display: none;
+		@include screen-reader-text();
 	}
 
-	h1 {
-		font-size: 1em;
+	h3.widget-title {
+		font-size: 1.387em;
 		letter-spacing: 0;
 		border-bottom: 3px solid $color_body;
 		padding: 0 0 1em;
@@ -46,7 +46,7 @@
 }
 
 .header-widget-region {
-	margin-bottom: 4.236em;
+	@include clearfix;
 
 	.widget {
 		margin: 0;
@@ -67,7 +67,7 @@
 		}
 
 		input[type=submit] {
-			display: none;
+			@include screen-reader-text();
 		}
 
 		&:before {
@@ -99,7 +99,7 @@
 				font-family: "FontAwesome";
 				margin-right: .53em;
 				display: inline-block;
-				opacity: 0.25;
+				opacity: 0.35;
 			}
 		}
 
@@ -141,6 +141,12 @@
 		li {
 			&:before {
 				content: "\f114";
+			}
+
+			&.current-cat {
+				&:before {
+					content: "\f115";
+				}
 			}
 		}
 	}
@@ -197,15 +203,9 @@
 		a {
 			color: $color_body;
 			font-weight: 400;
-			opacity: 0.5;
 
 			&:hover {
 				color: $color_links;
-				opacity: 1;
-			}
-
-			&.button {
-				opacity: 1;
 			}
 		}
 	}

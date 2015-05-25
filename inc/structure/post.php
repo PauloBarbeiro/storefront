@@ -41,13 +41,18 @@ if ( ! function_exists( 'storefront_post_content' ) ) {
 		if ( has_post_thumbnail() ) {
 			the_post_thumbnail( 'full', array( 'itemprop' => 'image' ) );
 		}
-		?>
-		<?php the_content( __( 'Continue reading <span class="meta-nav">&rarr;</span>', 'storefront' ) ); ?>
-		<?php
-			wp_link_pages( array(
-				'before' => '<div class="page-links">' . __( 'Pages:', 'storefront' ),
-				'after'  => '</div>',
-			) );
+
+		the_content(
+			sprintf(
+				__( 'Continue reading %s', 'storefront' ),
+				'<span class="screen-reader-text">' . get_the_title() . '</span>'
+			)
+		);
+
+		wp_link_pages( array(
+			'before' => '<div class="page-links">' . __( 'Pages:', 'storefront' ),
+			'after'  => '</div>',
+		) );
 		?>
 		</div><!-- .entry-content -->
 		<?php
@@ -69,7 +74,12 @@ if ( ! function_exists( 'storefront_post_meta' ) ) {
 			$categories_list = get_the_category_list( __( ', ', 'storefront' ) );
 
 			if ( $categories_list && storefront_categorized_blog() ) : ?>
-				<span class="cat-links"><?php echo wp_kses_post( $categories_list ); ?></span>
+				<span class="cat-links">
+					<?php
+					echo '<span class="screen-reader-text">' . esc_attr( __( 'Categories: ', 'storefront' ) ) . '</span>';
+					echo wp_kses_post( $categories_list );
+					?>
+				</span>
 			<?php endif; // End if categories ?>
 
 			<?php
@@ -77,7 +87,12 @@ if ( ! function_exists( 'storefront_post_meta' ) ) {
 			$tags_list = get_the_tag_list( '', __( ', ', 'storefront' ) );
 
 			if ( $tags_list ) : ?>
-				<span class="tags-links"><?php echo wp_kses_post( $tags_list ); ?></span>
+				<span class="tags-links">
+					<?php
+					echo '<span class="screen-reader-text">' . esc_attr( __( 'Tags: ', 'storefront' ) ) . '</span>';
+					echo wp_kses_post( $tags_list );
+					?>
+				</span>
 			<?php endif; // End if $tags_list ?>
 
 			<?php endif; // End if 'post' == get_post_type() ?>
@@ -95,26 +110,15 @@ if ( ! function_exists( 'storefront_paging_nav' ) ) {
 	 * Display navigation to next/previous set of posts when applicable.
 	 */
 	function storefront_paging_nav() {
-		// Don't print empty markup if there's only one page.
-		if ( $GLOBALS['wp_query']->max_num_pages < 2 ) {
-			return;
-		}
-		?>
-		<nav class="navigation paging-navigation" role="navigation">
-			<h1 class="screen-reader-text"><?php _e( 'Posts navigation', 'storefront' ); ?></h1>
-			<div class="nav-links">
+		global $wp_query;
 
-				<?php if ( get_next_posts_link() ) : ?>
-				<div class="nav-previous"><?php next_posts_link( __( '<span class="meta-nav">&larr;</span> Older posts', 'storefront' ) ); ?></div>
-				<?php endif; ?>
+		$args = array(
+			'type' 		=> 'list',
+			'next_text' => __( 'Next', 'storefront' ) . '&nbsp;<span class="meta-nav">&rarr;</span>',
+			'prev_text'	=> '<span class="meta-nav">&larr;</span>&nbsp' . __( 'Previous', 'storefront' ),
+			);
 
-				<?php if ( get_previous_posts_link() ) : ?>
-				<div class="nav-next"><?php previous_posts_link( __( 'Newer posts <span class="meta-nav">&rarr;</span>', 'storefront' ) ); ?></div>
-				<?php endif; ?>
-
-			</div><!-- .nav-links -->
-		</nav><!-- .navigation -->
-		<?php
+		the_posts_pagination( $args );
 	}
 }
 
@@ -123,24 +127,11 @@ if ( ! function_exists( 'storefront_post_nav' ) ) {
 	 * Display navigation to next/previous post when applicable.
 	 */
 	function storefront_post_nav() {
-		// Don't print empty markup if there's nowhere to navigate.
-		$previous = ( is_attachment() ) ? get_post( get_post()->post_parent ) : get_adjacent_post( false, '', true );
-		$next     = get_adjacent_post( false, '', false );
-
-		if ( ! $next && ! $previous ) {
-			return;
-		}
-		?>
-		<nav class="navigation post-navigation" role="navigation">
-			<h1 class="screen-reader-text"><?php _e( 'Post navigation', 'storefront' ); ?></h1>
-			<div class="nav-links">
-				<?php
-					previous_post_link( '<div class="nav-previous">%link</div>', _x( '<span class="meta-nav">&larr;</span>&nbsp;%title', 'Previous post link', 'storefront' ) );
-					next_post_link(     '<div class="nav-next">%link</div>',     _x( '%title&nbsp;<span class="meta-nav">&rarr;</span>', 'Next post link',     'storefront' ) );
-				?>
-			</div><!-- .nav-links -->
-		</nav><!-- .navigation -->
-		<?php
+		$args = array(
+			'next_text' => '%title &nbsp;<span class="meta-nav">&rarr;</span>',
+			'prev_text'	=> '<span class="meta-nav">&larr;</span>&nbsp;%title',
+			);
+		the_post_navigation( $args );
 	}
 }
 

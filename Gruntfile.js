@@ -51,14 +51,15 @@ module.exports = function( grunt ) {
 
 		// Compile all .scss files.
 		sass: {
-			compile: {
+			dist: {
 				options: {
 					require: 'susy',
 					sourcemap: 'none',
-					loadPath: require( 'node-bourbon' ).includePaths
+					includePaths: require( 'node-bourbon' ).includePaths
 				},
 				files: [{
 					'style.css': 'style.scss',
+					'inc/admin/css/welcome.css': 'inc/admin/css/welcome.scss',
 					'inc/woocommerce/css/bookings.css': 'inc/woocommerce/css/bookings.scss',
 					'inc/woocommerce/css/brands.css': 'inc/woocommerce/css/brands.scss',
 					'inc/woocommerce/css/wishlists.css': 'inc/woocommerce/css/wishlists.scss',
@@ -89,6 +90,7 @@ module.exports = function( grunt ) {
 			css: {
 				files: [
 					'style.scss',
+					'inc/admin/css/*.scss',
 					'inc/woocommerce/css/*.scss',
 					'sass/base/*.scss',
 					'sass/components/*.scss',
@@ -128,6 +130,9 @@ module.exports = function( grunt ) {
 			frontend: {
 				options: {
 					potFilename: 'storefront.pot',
+					exclude: [
+						'storefront/.*' // Exclude deploy directory
+					],
 					processPot: function ( pot ) {
 						pot.headers['project-id-version'];
 						return pot;
@@ -177,25 +182,60 @@ module.exports = function( grunt ) {
 					'!Gruntfile.js',
 					'!package.json',
 					'!node_modules/**',
-					'!.DS_Store'
+					'!.DS_Store',
+					'!npm-debug.log'
 				],
 				dest: 'storefront',
 				expand: true,
 				dot: true
 			}
-		}
+		},
 
+		// Shell actions for transifex client
+		shell: {
+			options: {
+				stdout: true,
+				stderr: true
+			},
+			txpush: {
+				command: 'tx push -s' // push the resources
+			},
+			txpull: {
+				command: 'tx pull -a -f' // pull the .po files
+			}
+		},
+
+		// Convert .po to .mo
+		potomo: {
+			options: {
+				poDel: false
+			},
+			dist: {
+				files: [{
+					expand: true,
+					cwd: 'languages/',
+					src: [
+						'*.po'
+					],
+					dest: 'languages/',
+					ext: '.mo',
+					nonull: true
+				}]
+			}
+		}
 	});
 
 	// Load NPM tasks to be used here
 	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
-	grunt.loadNpmTasks( 'grunt-contrib-sass' );
+	grunt.loadNpmTasks( 'grunt-sass' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-wp-i18n' );
 	grunt.loadNpmTasks( 'grunt-checktextdomain' );
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
+	grunt.loadNpmTasks( 'grunt-shell' );
+	grunt.loadNpmTasks( 'grunt-potomo' );
 
 	// Register tasks
 	grunt.registerTask( 'default', [
@@ -208,12 +248,23 @@ module.exports = function( grunt ) {
 		'cssmin'
 	]);
 
+	grunt.registerTask( 'tx_update', [
+		'makepot',
+		'shell:txpush'
+	]);
+
 	grunt.registerTask( 'dev', [
 		'default',
-		'makepot'
+		'tx_update'
+	]);
+
+	grunt.registerTask( 'mo', [
+		'shell:txpull',
+		'potomo'
 	]);
 
 	grunt.registerTask( 'deploy', [
+		'mo',
 		'copy'
 	]);
 };
